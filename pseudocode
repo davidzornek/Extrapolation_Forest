@@ -1,0 +1,35 @@
+tuning params: leaf_size, m (num of vars to try at each split), max_depth, leaf_size
+
+Define a cost function C(x,y):
+    x and y are data sets with response R, extrapolation variable E, and predictors P_0, P_1, ... , P_n
+    fit linear models R ~ E for x and y
+    calculate and return overall rmse for the compound model
+    
+for each tree:
+    randomly split data into a bag set and OOB set, utilzing a fixed split %
+    at each node:
+        if number of data in node >= leaf_size and depth < max_depth:
+            randomly select a set V of m variables from the P_i to try
+            for each i in V:
+                if V is categorical:
+                    split the values of V for the bag into two groups f and g meeting the following requirements:
+                        1. f and g are a mutually exlusive exhuastion of the values of V in the bag
+                        2. Out of all possible f and g meeting criteria 1, OOB C is minimized
+                        3. temporarily store split criterion in the most efficient manner
+                        4. temporarily store this optimal value of C as C_i
+                else if V is continuous:
+                    1. find the percentile p of V in the bag that optimizes OOB C when x and y are defined by splitting at p
+                    2. temporarily store the split criterion as a value of V (not as a percentile)
+                    3. temporarily store the optimzal value of C as C_i
+            choose the minimal C_i, permanently store its split criterion
+            move to the next node
+        else:
+            fit a linear model R ~ E to the leaf
+            permanently store the model
+            permanently store the OOB error for the tree
+            
+training error is the average of all OOB errors
+predictions are made by:
+    following the split rules
+    predicting on the linear model in each leaf node
+    taking the average prediction across all trees.
